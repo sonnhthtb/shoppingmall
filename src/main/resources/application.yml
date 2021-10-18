@@ -5,7 +5,7 @@ server:
 # SPRING ----------------------------------------------------------------------------------------------------
 spring:
   application:
-    name: grooo-shopping-mall
+    name: shopping-mall
   servlet:
     multipart:
       max-file-size: 10MB
