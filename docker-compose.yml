@@ -1,0 +1,28 @@
+version: '3.5'
+
+services:
+
+  mysql:
+    container_name: mysql_container
+    image: mysql
+    environment:
+      MYSQL_DATABASE: 'grooo_shopping_mall_backend'
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_USER: 'admin'
+      MYSQL_PASSWORD: '123456'
+    volumes:
+      - mysql:/data/mysql
+    ports:
+      - '3307:3306'
+    expose:
+      - '3307'
+    restart: unless-stopped
+
+networks:
+  demo:
+    driver: bridge
+
+volumes:
+  mysql:
+  mysql2:
+  my-db:
