@@ -72,7 +72,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public JwtResponse refreshToken(RefreshTokenRequest request) {
+
         try {
+
+            //validate refresh token
             String refreshToken = request.getRefreshToken();
             if (refreshToken != null && jwtService.validateJwtToken(refreshToken)) {
                 String username = jwtService.getUserNameFromJwtToken(refreshToken);
@@ -84,6 +87,8 @@ public class AuthServiceImpl implements AuthService {
 
                 log.info("Refresh token for user: " + customUserDetails.getUsername());
 
+
+                // generate new token
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 Map<String, Object> roles = new HashMap<>();
                 roles.put("roles",  customUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
