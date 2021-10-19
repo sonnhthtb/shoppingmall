@@ -14,25 +14,13 @@ import java.io.IOException;
 
 @Log4j2
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-
-    private final HandlerExceptionResolver resolver;
-
-    @Autowired
-    public RestAuthenticationEntryPoint(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        this.resolver = resolver;
-    }
-
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse httpServletResponse, AuthenticationException ex) throws IOException {
-        log.error("User is unauthorised. Routing from the entry point");
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException e)
+            throws IOException {
 
-        if (request.getAttribute("javax.servlet.error.exception") != null) {
-            Throwable throwable = (Throwable) request.getAttribute("javax.servlet.error.exception");
-            resolver.resolveException(request, httpServletResponse, null, (Exception) throwable);
-        }
-        if (!httpServletResponse.isCommitted()) {
-            httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
-        }
+        log.error("Unauthorized error. Message - {}", e.getMessage());
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error -> Unauthorized");
     }
 }
