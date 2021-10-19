@@ -7,6 +7,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,26 +22,9 @@ import java.nio.file.AccessDeniedException;
 @ControllerAdvice
 public final class HandleExceptionController {
 
-
-    @ExceptionHandler(AccessDeniedException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)  // Nếu validate fail thì trả về 403
-    public ResponseEntity<BaseResponse<ErrorResponse>> handleAccessDeniedException(AccessDeniedException exception) {
-
-        String errorMessage = "Access Denied";
-
-        if (!StringUtils.isBlank(exception.getMessage())) {
-            log.error("Exception Detail: {} and rootCause: {}",
-                    exception.getMessage(),
-                    StringUtil.stackTraceToString(exception));
-        }
-        HttpStatus httpStatus = HttpStatus.FORBIDDEN;
-        ErrorResponse errorResponse = new ErrorResponse(AuthCode.LOGIN_FAIL, errorMessage, HttpStatus.FORBIDDEN);
-        return new ResponseEntity<>(BaseResponse.ofFailed(errorResponse), httpStatus);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
+    @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)  // Nếu validate fail thì trả về 401
-    public ResponseEntity<BaseResponse<ErrorResponse>> handleAuthException(BadCredentialsException exception) {
+    public ResponseEntity<BaseResponse<ErrorResponse>> handleAuthException(AuthenticationException exception) {
         String errorMessage = "Login Fail";
         if (!StringUtils.isBlank(exception.getMessage())) {
             log.error("Exception Detail: {} and rootCause: {}",

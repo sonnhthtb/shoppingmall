@@ -60,6 +60,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/public/api/v1/auth/login/**").permitAll();
         http.authorizeRequests()
+                .antMatchers("/public/api/v1/auth/refresh_token/**").permitAll();
+        http.authorizeRequests()
                 .antMatchers("/v2/api-docs",
                         "/configuration/ui",
                         "/swagger-resources/**",

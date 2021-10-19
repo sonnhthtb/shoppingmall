@@ -2,6 +2,7 @@ package com.example.shoppingmall.controller;
 
 import com.example.shoppingmall.model.BaseResponse;
 import com.example.shoppingmall.model.request.user.LoginRequest;
+import com.example.shoppingmall.model.request.user.RefreshTokenRequest;
 import com.example.shoppingmall.model.response.user.JwtResponse;
 import com.example.shoppingmall.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,11 @@ public class AuthController {
     @PostMapping("/login")
     public BaseResponse<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
         return BaseResponse.ofSuccess(authService.login(request));
+    }
+
+    @PostMapping("/refresh_token")
+    public BaseResponse<JwtResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        return BaseResponse.ofSuccess(authService.refreshToken(request));
     }
 
 }
