@@ -32,10 +32,7 @@ public class JwtServiceImpl implements JwtService {
     //refresh_token with expired longer than access_token
     public String generateRefreshToken(Authentication authentication) {
         CustomUserDetail userPrincipal = (CustomUserDetail) authentication.getPrincipal();
-
-        Map<String, Object> roles = new HashMap<>();
-        roles.put("roles",  userPrincipal.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
-        return JwtUtils.build(userPrincipal.getUsername(), 3*EXPIRE_SECONDS, roles);
+        return JwtUtils.build(userPrincipal.getUsername(), 3*EXPIRE_SECONDS);
     }
 
     public Boolean validateJwtToken(String token) {

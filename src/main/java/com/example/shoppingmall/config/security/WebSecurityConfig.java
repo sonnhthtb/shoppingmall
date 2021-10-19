@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import com.example.shoppingmall.filter.CustomAuthenticationFilter;
 import com.example.shoppingmall.service.JwtService;
 
 @Configuration
@@ -22,8 +21,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
 
-    private final JwtService jwtService;
-
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Bean
@@ -32,27 +29,40 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManager();
     }
 
+//    @Bean
+//    public CustomAccessDeniedHandler customAccessDeniedHandler() {
+//        return new CustomAccessDeniedHandler();
+//    }
+
 
     @Autowired
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
-        http.authorizeRequests()
-                .anyRequest().permitAll();
-        http.addFilter(new CustomAuthenticationFilter(authenticationManagerBean(), jwtService));
-        http.sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.cors();
-    }
+//        http.httpBasic().authenticationEntryPoint(restServicesEntryPoint);
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception{
-        return super.authenticationManagerBean();
+        http.authorizeRequests()
+                .antMatchers("/public/api/v1/auth/login/**").permitAll();
+        http.authorizeRequests()
+                .antMatchers("/v2/api-docs",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/webjars/**")
+                .permitAll();
+        http.authorizeRequests()
+                .antMatchers("/public/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests()
+                .antMatchers("/manager/**").hasAnyAuthority("ROLE_MANAGER");
+        http.authorizeRequests()
+                .antMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN");
+        http.authorizeRequests().anyRequest().authenticated();
     }
 
 }

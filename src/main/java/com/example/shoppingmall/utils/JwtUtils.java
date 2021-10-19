@@ -23,7 +23,6 @@ public class JwtUtils {
     return Jwts.builder()
         .setSubject(subject)
         .setIssuedAt(now)
-        .claim(UUID.randomUUID().toString(), UUID.randomUUID())
         .addClaims(claims)
         .setExpiration(new Date(now.getTime() + expirationSeconds * 1000L))
         .signWith(SignatureAlgorithm.HS512, secretKey)

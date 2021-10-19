@@ -137,8 +137,7 @@ public class ProductServiceImpl implements ProductService {
                     ProductResponse response = modelMapper.map(product, ProductResponse.class);
 
                     // map list category of product to list CategoryResponse of response
-                    List<Category> categories = new ArrayList<>(product.getCategories());
-                    List<CategoryResponse> categoryResponses = categories.stream().map(
+                    List<CategoryResponse> categoryResponses = product.getCategories().stream().map(
                             category -> modelMapper.map(category, CategoryResponse.class)
                     ).collect(Collectors.toList());
                     response.setCategoryResponseList(categoryResponses);

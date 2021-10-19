@@ -15,8 +15,4 @@ public class ShoppingMallApplication {
 		SpringApplication.run(ShoppingMallApplication.class, args);
 	}
 
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
 }

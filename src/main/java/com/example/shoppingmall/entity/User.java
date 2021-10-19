@@ -19,6 +19,9 @@ public class User extends BaseModel{
     @Column(name = "username", length = 50, nullable = false)
     private String username;
 
+    @Column(name = "email", nullable = false)
+    private String email;
+
     @Column(name = "password", nullable = false)
     private String password;
 

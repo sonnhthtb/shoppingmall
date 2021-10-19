@@ -12,8 +12,8 @@ import java.util.Collection;
 @NoArgsConstructor
 public class JwtResponse {
 
-    private Long id;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private String username;
     private String fullName;
     private Collection<? extends GrantedAuthority> roles;

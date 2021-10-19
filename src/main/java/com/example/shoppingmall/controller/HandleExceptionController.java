@@ -1,23 +1,55 @@
 package com.example.shoppingmall.controller;
 
-import com.example.shoppingmall.exception.BindingCode;
-import com.example.shoppingmall.exception.BusinessCode;
-import com.example.shoppingmall.exception.BusinessException;
-import com.example.shoppingmall.exception.ErrorResponse;
+import com.example.shoppingmall.exception.*;
 import com.example.shoppingmall.model.BaseResponse;
 import com.example.shoppingmall.utils.StringUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.file.AccessDeniedException;
+
 @Log4j2
 @ControllerAdvice
 public final class HandleExceptionController {
+
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)  // Nếu validate fail thì trả về 403
+    public ResponseEntity<BaseResponse<ErrorResponse>> handleAccessDeniedException(AccessDeniedException exception) {
+
+        String errorMessage = "Access Denied";
+
+        if (!StringUtils.isBlank(exception.getMessage())) {
+            log.error("Exception Detail: {} and rootCause: {}",
+                    exception.getMessage(),
+                    StringUtil.stackTraceToString(exception));
+        }
+        HttpStatus httpStatus = HttpStatus.FORBIDDEN;
+        ErrorResponse errorResponse = new ErrorResponse(AuthCode.LOGIN_FAIL, errorMessage, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(BaseResponse.ofFailed(errorResponse), httpStatus);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)  // Nếu validate fail thì trả về 401
+    public ResponseEntity<BaseResponse<ErrorResponse>> handleAuthException(BadCredentialsException exception) {
+        String errorMessage = "Login Fail";
+        if (!StringUtils.isBlank(exception.getMessage())) {
+            log.error("Exception Detail: {} and rootCause: {}",
+                    exception.getMessage(),
+                    StringUtil.stackTraceToString(exception.getCause()));
+        }
+        HttpStatus httpStatus = HttpStatus.UNAUTHORIZED;
+        ErrorResponse errorResponse = new ErrorResponse(AuthCode.LOGIN_FAIL, errorMessage, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(BaseResponse.ofFailed(errorResponse), httpStatus);
+    }
 
     @ExceptionHandler(BindException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)  // Nếu validate fail thì trả về 400

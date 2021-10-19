@@ -7,10 +7,13 @@ import com.example.shoppingmall.exception.BusinessException;
 import com.example.shoppingmall.model.CustomUserDetail;
 import com.example.shoppingmall.model.request.user.RegisterRequest;
 import com.example.shoppingmall.model.request.user.RoleToUserRequest;
+import com.example.shoppingmall.model.response.role.RoleResponse;
+import com.example.shoppingmall.model.response.user.UserResponse;
 import com.example.shoppingmall.repository.RoleRepository;
 import com.example.shoppingmall.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -34,11 +38,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final PasswordEncoder bCryptPasswordEncoder;
 
+    private final ModelMapper modelMapper;
+
     @Transactional(readOnly = true)
     @Override
-    public List<User> findAll() {
+    public List<UserResponse> findAll() {
         log.info("Fetching all users");
-        return userRepository.findAll();
+        List<User> users = userRepository.findAll();
+        List<UserResponse> responses = users.stream().map(
+                user -> {
+                    UserResponse userResponse = modelMapper.map(user, UserResponse.class);
+                    List<RoleResponse> roleResponses = user.getRoles().stream().map(
+                            role -> modelMapper.map(role, RoleResponse.class)
+                    ).collect(Collectors.toList());
+                    userResponse.setRoles(roleResponses);
+                    return userResponse;
+                }
+        ).collect(Collectors.toList());
+
+        return responses;
     }
 
     @Transactional(readOnly = true)
@@ -57,10 +75,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         log.info("Saving new user to the database {}", request.getUsername());
 
-        User user = new User();
-        user.setUsername(request.getUsername());
+        User user = modelMapper.map(request, User.class);
         user.setPassword(bCryptPasswordEncoder.encode(request.getPassword()));
-        user.setFullName(request.getFullName());
         Role role = roleRepository.findByName("USER").orElseThrow(
                 () -> new BusinessException(BusinessCode.NOT_FOUND_ROLE, "USER")
         );
