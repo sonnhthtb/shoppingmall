@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.example.shoppingmall.constant.SystemConstant;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 

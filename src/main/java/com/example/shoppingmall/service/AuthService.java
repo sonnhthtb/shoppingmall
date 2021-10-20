@@ -10,7 +10,13 @@ public interface AuthService {
 
     JwtResponse login(LoginRequest request);
 
+    JwtResponse refreshToken(RefreshTokenRequest request);
+
     Boolean register (RegisterRequest request);
 
-    JwtResponse refreshToken(RefreshTokenRequest request);
+    Boolean verifyAccount(String token);
+
+    Boolean checkUsernameExisted(RegisterRequest request);
+
+    Boolean checkEmailExisted(RegisterRequest request);
 }

@@ -16,6 +16,10 @@ spring:
     port: 587
     username: pythonupdate21@gmail.com
     password: pythonpassword21
+    properties.mail.smtp:
+      auth: true
+      starttls.enable: true
+      ssl.trust: smtp.gmail.com
   # DATASOURCE ----------------------------------------------------------------------------------------------------
   datasource:
     url: jdbc:mysql://localhost:3307/grooo_shopping_mall_backend?useSSL=false&useUnicode=yes&characterEncoding=UTF-8

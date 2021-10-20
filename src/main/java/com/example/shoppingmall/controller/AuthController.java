@@ -21,11 +21,10 @@ import javax.validation.Valid;
 public class AuthController {
 
     private final AuthService authService;
-    private final UserService userService;
 
     @PostMapping("/register")
-    public BaseResponse<User> signup(@Valid @RequestBody RegisterRequest request) {
-        return BaseResponse.ofSuccess(HttpStatus.CREATED, userService.save(request));
+    public BaseResponse<Boolean> signup(@Valid @RequestBody RegisterRequest request) {
+        return BaseResponse.ofSuccess(HttpStatus.CREATED, authService.register(request));
     }
 
     @PostMapping("/login")
@@ -36,6 +35,21 @@ public class AuthController {
     @PostMapping("/refresh_token")
     public BaseResponse<JwtResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         return BaseResponse.ofSuccess(authService.refreshToken(request));
+    }
+
+    @GetMapping("/accountVerification/{token}")
+    public BaseResponse<Boolean> verifyAccount(@PathVariable String token) {
+        return BaseResponse.ofSuccess(authService.verifyAccount(token));
+    }
+
+    @PostMapping("/checkUserName")
+    public BaseResponse<Boolean> checkUsernameExisted(@Valid @RequestBody RegisterRequest request) {
+        return BaseResponse.ofSuccess(authService.checkUsernameExisted(request));
+    }
+
+    @PostMapping("/checkEmail")
+    public BaseResponse<Boolean> checkEmailExisted(@Valid @RequestBody RegisterRequest request) {
+        return BaseResponse.ofSuccess(authService.checkEmailExisted(request));
     }
 
 }

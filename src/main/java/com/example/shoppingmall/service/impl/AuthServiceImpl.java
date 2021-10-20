@@ -1,20 +1,27 @@
 package com.example.shoppingmall.service.impl;
 
+import com.example.shoppingmall.entity.Role;
 import com.example.shoppingmall.entity.User;
+import com.example.shoppingmall.entity.VerifyToken;
+import com.example.shoppingmall.exception.AuthCode;
 import com.example.shoppingmall.exception.BusinessCode;
 import com.example.shoppingmall.exception.BusinessException;
 import com.example.shoppingmall.model.CustomUserDetail;
+import com.example.shoppingmall.model.NotificationEmail;
 import com.example.shoppingmall.model.request.user.LoginRequest;
 import com.example.shoppingmall.model.request.user.RefreshTokenRequest;
 import com.example.shoppingmall.model.request.user.RegisterRequest;
 import com.example.shoppingmall.model.response.user.JwtResponse;
+import com.example.shoppingmall.repository.RoleRepository;
 import com.example.shoppingmall.repository.UserRepository;
+import com.example.shoppingmall.repository.VerifyTokenRepository;
 import com.example.shoppingmall.service.AuthService;
 import com.example.shoppingmall.service.JwtService;
+import com.example.shoppingmall.service.NotificationService;
 import com.example.shoppingmall.utils.JwtUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.MediaType;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,11 +29,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,8 +46,15 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final JwtService jwtService;
+    private final NotificationService notificationService;
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final VerifyTokenRepository verifyTokenRepository;
+
+    private final ModelMapper modelMapper;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public JwtResponse login(LoginRequest request) {
@@ -51,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
         CustomUserDetail customUserDetails = (CustomUserDetail) authentication.getPrincipal();
 
         log.info("Logged in User returned [API]: " + customUserDetails.getUsername());
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         Map<String, Object> roles = new HashMap<>();
         roles.put("roles",  customUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
@@ -65,16 +80,12 @@ public class AuthServiceImpl implements AuthService {
         return response;
     }
 
-    @Override
-    public Boolean register(RegisterRequest request) {
-        return null;
-    }
+
 
     @Override
     public JwtResponse refreshToken(RefreshTokenRequest request) {
 
         try {
-
             //validate refresh token
             String refreshToken = request.getRefreshToken();
             if (refreshToken != null && jwtService.validateJwtToken(refreshToken)) {
@@ -108,6 +119,65 @@ public class AuthServiceImpl implements AuthService {
         return null;
     }
 
+    @Override
+    public Boolean register(RegisterRequest request) {
+
+        if(!checkUsernameExisted(request) && !checkEmailExisted(request)) {
+            User user = modelMapper.map(request, User.class);
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            Role role = roleRepository.findByName("ROLE_USER").orElseThrow(
+                    () -> new BusinessException(BusinessCode.NOT_FOUND_ROLE, "ROLE_USER")
+            );
+            user.setRoles(new HashSet<>(Arrays.asList(role)));
+            user.setIsVerified(false);
+            userRepository.save(user);
+
+            String token = generateVerificationToken(user);
+            Date date = new Date();
+            NotificationEmail email = new NotificationEmail("Please Activate your Account", user.getEmail(),
+                    "Thank you for signing up to Shopping Mall, " +
+                            "this is your secret key to active your account: " + token +
+                            "\nThis secret key will expired after 1 hour" );
+            notificationService.sendMail(email);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean verifyAccount(String token) {
+        VerifyToken verifyToken = verifyTokenRepository.findByToken(token);
+        Date now = new Date();
+
+        //check can find token and token not expired
+        if(verifyToken != null && new Timestamp(now.getTime()).before(verifyToken.getExpiryDate())) {
+            String username = verifyToken.getUser().getUsername();
+            User user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new BusinessException(BusinessCode.NOT_FOUND_USER, username)
+            );
+            user.setIsVerified(true);
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean checkUsernameExisted(RegisterRequest request) {
+        if(userRepository.findByUsername(request.getUsername()).isPresent()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean checkEmailExisted(RegisterRequest request) {
+        if(userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return true;
+        }
+        return false;
+    }
+
     private UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Loading User from database");
         User user = userRepository.findByUsername(username).orElseThrow(
@@ -120,5 +190,16 @@ public class AuthServiceImpl implements AuthService {
     private String generateRefreshToken(Authentication authentication) {
         CustomUserDetail userPrincipal = (CustomUserDetail) authentication.getPrincipal();
         return JwtUtils.build(userPrincipal.getUsername(), 3*EXPIRE_SECONDS);
+    }
+
+    private String generateVerificationToken(User user) {
+        String token = UUID.randomUUID().toString();
+        VerifyToken verificationToken = new VerifyToken();
+        verificationToken.setToken(token);
+        verificationToken.setUser(user);
+        Date now = new Date();
+        verificationToken.setExpiryDate(new Timestamp(now.getTime() + EXPIRE_SECONDS * 1000L));
+        verifyTokenRepository.save(verificationToken);
+        return token;
     }
 }
