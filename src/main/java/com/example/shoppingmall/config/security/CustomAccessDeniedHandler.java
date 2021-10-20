@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+//Custom response for not have permission to access
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override

@@ -14,8 +14,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: containerroundusemarketplace@gmail.com
-    password: hrbbgcnptdqizdts
+    username: pythonupdate21@gmail.com
+    password: pythonpassword21
   # DATASOURCE ----------------------------------------------------------------------------------------------------
   datasource:
     url: jdbc:mysql://localhost:3307/grooo_shopping_mall_backend?useSSL=false&useUnicode=yes&characterEncoding=UTF-8

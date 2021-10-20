@@ -45,9 +45,6 @@ public class CustomResponseBodyAdviceAdapter implements ResponseBodyAdvice<Objec
 	}
 
 	public void logResponse(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object body) {
-		if (httpServletRequest.getRequestURI().contains("medias")) {
-			return;
-		}
 		StringBuilder data = new StringBuilder();
 		try {
 			data.append("[response:").append(new Gson().toJson(body)).append("]");

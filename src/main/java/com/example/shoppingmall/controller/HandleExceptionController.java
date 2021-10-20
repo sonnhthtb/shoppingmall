@@ -4,19 +4,14 @@ import com.example.shoppingmall.exception.*;
 import com.example.shoppingmall.model.BaseResponse;
 import com.example.shoppingmall.utils.StringUtil;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.apache.commons.lang3.StringUtils;
-
-import java.nio.file.AccessDeniedException;
 
 @Log4j2
 @ControllerAdvice

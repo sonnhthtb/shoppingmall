@@ -34,9 +34,6 @@ public class CustomRequestBodyAdviceAdapter extends RequestBodyAdviceAdapter {
 	}
 
 	public void logRequest(HttpServletRequest httpServletRequest, Object body) {
-		if (httpServletRequest.getRequestURI().contains("medias")) {
-			return;
-		}
 		StringBuilder data = new StringBuilder();
 		data.append("[request:").append(new Gson().toJson(body)).append("]");
 		log.info(data.toString());

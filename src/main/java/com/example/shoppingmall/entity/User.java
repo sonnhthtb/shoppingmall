@@ -28,6 +28,9 @@ public class User extends BaseModel{
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Column(name = "is_verified")
+    private Boolean isVertified;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_role",joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")

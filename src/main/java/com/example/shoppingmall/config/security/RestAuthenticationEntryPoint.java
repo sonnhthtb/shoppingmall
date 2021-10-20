@@ -5,13 +5,9 @@ import com.example.shoppingmall.exception.ErrorResponse;
 import com.example.shoppingmall.model.BaseResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +15,8 @@ import java.io.IOException;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+
+//custom response when not authentication
 @Log4j2
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
