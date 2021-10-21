@@ -36,7 +36,7 @@
 
     </Appenders>
     <Loggers>
-        <Logger name="vn.grooo.groooshoppingmall" additivity="true">
+        <Logger name="com.example.shoppingmall" additivity="true">
             <appender-ref ref="fileLogger" level="info" />
             <appender-ref ref="errorLogger" level="error" />
         </Logger>
